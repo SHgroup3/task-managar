@@ -26,4 +26,40 @@ router.get("/list-tasks", async (req, res) => {
   res.json(tasks);
 });
 
+const updateTask = async (task) => {
+  try {
+    const res = await fetch(`http://localhost:5000/tasks/update-task/${task._id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: task.title,
+        description: task.description,
+        status: task.status,
+      }),
+    });
+
+    if (res.ok) {
+      alert("Task updated successfully!");
+      fetchTasks(); 
+    } else {
+
+      const errorData = await res.json();
+      alert(`Update failed: ${errorData.message || "Unknown error"}`);
+    }
+  } catch (err) {
+    // Agar network hi na ho ya fetch crash ho jaye
+    console.error("Update Error:", err);
+    alert("Network error! Please check your connection.");
+  }
+};
+router.delete("/delete-task/:id", async (req, res) => {
+  await Task.findByIdAndDelete(req.params.id);
+  res.json({ message: "Task deleted" });
+});
+
+
+
+
 module.exports = router;
