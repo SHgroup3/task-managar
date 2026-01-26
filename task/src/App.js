@@ -1,4 +1,4 @@
-import TaskApp from "./taskApp";
+import TaskApp from "./pages/taskApp";
 
 function App() {
   return <TaskApp />;
