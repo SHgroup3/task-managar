@@ -11,49 +11,54 @@ router.post("/create-tasks", async (req, res) => {
     return res.status(400).json({ message: "Title and description required" });
   }
 
-  if (status && !["pending", "failed", "success"].includes(status)) {
-    return res.status(400).json({ message: "Invalid status value" });
-  }
+  // if (status && !["pending", "failed", "success"].includes(status)) {
+  //   return res.status(400).json({ message: "Invalid status value" });
+  // }
 
-  const task = new Task({ title, description, status });
+  const task = new Task({ title, description});
   await task.save();
 
   res.status(201).json({ message: "Task created", task });
 });
 
 router.get("/list-tasks", async (req, res) => {
-  const tasks = await Task.find();
+   const { status } = req.query;
+
+    const filter = status ? { status } : {};
+    const tasks = await Task.find(filter);
+    
   res.json(tasks);
 });
 
-const updateTask = async (task) => {
+router.patch("/update-task/:id", async (req, res) => {
+   console.log("ID:", req.params.id);
+  console.log("BODY:", req.body);
   try {
-    const res = await fetch(`http://localhost:5000/tasks/update-task/${task._id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      {
+        title: req.body.title,
+        description: req.body.description,
+        status: req.body.status,
       },
-      body: JSON.stringify({
-        title: task.title,
-        description: task.description,
-        status: task.status,
-      }),
-    });
+      {
+        new: true
+      }
+    );
 
-    if (res.ok) {
-      alert("Task updated successfully!");
-      fetchTasks(); 
-    } else {
-
-      const errorData = await res.json();
-      alert(`Update failed: ${errorData.message || "Unknown error"}`);
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found" });
     }
-  } catch (err) {
-    // Agar network hi na ho ya fetch crash ho jaye
-    console.error("Update Error:", err);
-    alert("Network error! Please check your connection.");
+
+    res.json({
+      message: "Task updated successfully",
+      task: updatedTask,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-};
+});
+
 router.delete("/delete-task/:id", async (req, res) => {
   await Task.findByIdAndDelete(req.params.id);
   res.json({ message: "Task deleted" });

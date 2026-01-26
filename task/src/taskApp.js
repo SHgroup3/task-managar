@@ -30,20 +30,26 @@ function TaskApp() {
   };
 
   // FETCH TASKS
-  const fetchTasks = async () => {
-    setLoading(true);
-    setError("");
+  const fetchTasks = async (status = "all") => {
+  setLoading(true);
+  setError("");
 
-    try {
-      const res = await fetch("http://localhost:5000/tasks/list-tasks");
-      const data = await res.json();
-      setTasks(data);
-    } catch (err) {
-      setError("Failed to load tasks");
+  try {
+    let url = "http://localhost:5000/tasks/list-tasks";
+
+    if (status && status !== "all") {
+      url += `?status=${status}`;
     }
 
-    setLoading(false);
-  };
+    const res = await fetch(url);
+    const data = await res.json();
+    setTasks(data);
+  } catch (err) {
+    setError("Failed to load tasks");
+  }
+
+  setLoading(false);
+};
 
 
 
@@ -95,16 +101,9 @@ const updateTask = async (task) => {
       onChange={(e) => setDescription(e.target.value)}
       required
     />
-
-    <select
-      className="w-full p-3 border rounded-md"
-      value={status}
-      onChange={(e) => setStatus(e.target.value)}
-    >
-      <option value="pending">Pending</option>
-      <option value="success">Success</option>
-      <option value="failed">Failed</option>
-    </select>
+<div className="w-full p-3 text-left border rounded-md bg-gray-50 text-gray-700">
+  Pending
+</div>
 
     <button
       type="submit"
@@ -122,6 +121,40 @@ const updateTask = async (task) => {
   {error && <p className="text-red-500">{error}</p>}
 
   {/* TASK LIST */}
+  <div className="flex items-center gap-3 mb-5">
+  <span className="text-sm font-medium text-gray-600">
+    Filter by status:
+  </span>
+
+  <button
+    onClick={() => fetchTasks("all")}
+    className="px-4 py-1 rounded-full text-sm bg-gray-200 hover:bg-gray-300"
+  >
+    All
+  </button>
+
+  <button
+    onClick={() => fetchTasks("pending")}
+    className="px-4 py-1 rounded-full text-sm bg-yellow-200 hover:bg-yellow-300"
+  >
+    Pending
+  </button>
+
+  <button
+    onClick={() => fetchTasks("in-progress")}
+    className="px-4 py-1 rounded-full text-sm bg-blue-200 hover:bg-blue-300"
+  >
+    In-Progress
+  </button>
+
+  <button
+    onClick={() => fetchTasks("done")}
+    className="px-4 py-1 rounded-full text-sm bg-green-200 hover:bg-green-300"
+  >
+    Done
+  </button>
+</div>
+
   <ul className="space-y-3">
     {tasks.map((task) => (
       <li
@@ -161,8 +194,8 @@ const updateTask = async (task) => {
           className="col-span-3 border p-1 rounded-md text-sm mr-4"
         >
           <option value="pending">Pending</option>
-          <option value="success">Success</option>
-          <option value="failed">Failed</option>
+          <option value="in-progress">In-progress</option>
+          <option value="done">Done</option>
         </select>
 
         {/* BUTTONS */}
