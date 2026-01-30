@@ -19,14 +19,13 @@ exports.createTask = async (req, res) => {
 // Get Tasks
 exports.getTasks = async (req, res) => {
   try {
-    const { status } = req.query;
-    const filter = status ? { status } : {};
-    const tasks = await Task.find(filter);
-    res.json(tasks);
+    const tasks = await Task.find({ isDeleted: false });
+    res.status(200).json(tasks);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
+
 
 // Update Task
 exports.updateTask = async (req, res) => {
@@ -48,12 +47,37 @@ exports.updateTask = async (req, res) => {
 };
 
 // Delete Task
+
+
 exports.deleteTask = async (req, res) => {
   try {
-    const deletedTask = await Task.findByIdAndDelete(req.params.id);
-    if (!deletedTask) return res.status(404).json({ message: "Task not found" });
-    res.json({ message: "Task deleted" });
+    const task = await Task.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true }
+    );
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    res.status(200).json({
+      message: 'Task soft deleted successfully',
+      task
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
+
+exports.getDeletedTasks = async (req, res) => {
+  try {
+    const tasks = await Task.find({ isDeleted: true });
+    res.status(200).json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
