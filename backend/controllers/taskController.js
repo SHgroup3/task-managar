@@ -19,12 +19,20 @@ exports.createTask = async (req, res) => {
 // Get Tasks
 exports.getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ isDeleted: false });
+    const { status } = req.query;
+    const filter = { isDeleted: false };
+    if (status) {
+      filter.status = status;
+    }
+
+    const tasks = await Task.find(filter);
     res.status(200).json(tasks);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 // Update Task
