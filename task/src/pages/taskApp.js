@@ -48,9 +48,9 @@ function TaskApp() {
           required
         />
 
-        <div className="w-full p-3 text-left border rounded-md bg-gray-50">
+        {/* <div className="w-full p-3 text-left border rounded-md bg-gray-50">
           Pending
-        </div>
+        </div> */}
 
         <button className="w-full bg-indigo-600 text-white p-3 rounded-md">
           Add Task
